@@ -23,4 +23,8 @@ export class Shoe {
       [this.shoe[i], this.shoe[j]] = [this.shoe[j], this.shoe[i]];
     }
   }
+
+  draw() {
+    return this.shoe.pop();
+  }
 }

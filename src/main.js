@@ -10,15 +10,23 @@ import { Game } from "./Game.js";
     const cutCardEl = document.getElementById("cut-card");
     const form = document.querySelector(".params-form");
 
-    let input = {
-      bankroll: 0,
-      runs: 0,
-      numDecks: 0,
-      cutCard: 0, // 1 = 0.33, 2 = 0.5, 3 = 0.66
-    };
-
     form?.addEventListener("submit", (e) => {
       e.preventDefault();
+
+      const input = init();
+
+      const game = createGame(input.numDecks, input.cutCard);
+
+      game.dealInitialCards();
+    });
+
+    function init() {
+      let input = {
+        bankroll: 0,
+        runs: 0,
+        numDecks: 0,
+        cutCard: 0, // 1 = 0.33, 2 = 0.5, 3 = 0.66
+      };
 
       if (!isNaN(+bankrollEl.value) && +bankrollEl.value > 0)
         input.bankroll = +bankrollEl.value;
@@ -27,15 +35,18 @@ import { Game } from "./Game.js";
         input.runs = +runsEl.value;
 
       input.numDecks = +decksEl.value;
+
       input.cutCard = +cutCardEl.value;
 
-      if (input.numDecks !== 1) {
-        const game = new Game(input.numDecks, input.cutCard);
-        game.dealInitialCards();
+      return input;
+    }
+
+    function createGame(numDecks, cutCard) {
+      if (numDecks !== 1) {
+        return new Game(numDecks, cutCard);
       } else {
-        const game = new Game();
-        game.dealInitialCards();
+        return new Game();
       }
-    });
+    }
   });
 })();
