@@ -1,7 +1,7 @@
 import { SUITS, VALUES } from "./conf.js";
 
-class Deck {
-  constructor(suits, values) {
+export class Deck {
+  constructor(suits = SUITS, values = VALUES) {
     this.cards = [];
     for (let suit of suits) {
       for (let value of values) {
@@ -30,17 +30,4 @@ class Deck {
         return [-1];
     }
   }
-
-  shuffle() {
-    for (let i = this.cards.length - 1; i > 0; i--) {
-      let j = Math.floor(Math.random() * (i + 1));
-      [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
-    }
-  }
-
-  draw() {
-    return this.cards.pop();
-  }
 }
-
-export default new Deck(SUITS, VALUES);

@@ -1,34 +1,41 @@
 "use strict";
-import deck from "./Deck.js";
+
+import { Game } from "./Game.js";
 
 (() => {
-  const bankrollEl = document.getElementById("bankroll");
-  const runsEl = document.getElementById("runs");
-  const decksEl = document.getElementById("decks");
-  const endMarkerEl = document.getElementById("endmarker");
-  const form = document.querySelector(".params-form");
+  document.addEventListener("DOMContentLoaded", () => {
+    const bankrollEl = document.getElementById("bankroll");
+    const runsEl = document.getElementById("runs");
+    const decksEl = document.getElementById("decks");
+    const cutCardEl = document.getElementById("cut-card");
+    const form = document.querySelector(".params-form");
 
-  let input = {
-    bankroll: 0,
-    runs: 0,
-    numOfDecks: 0,
-    endMarker: 0, // Endmarker values: 1 = 1/3, 2 = 1/2, 3 = 2/3
-  };
+    let input = {
+      bankroll: 0,
+      runs: 0,
+      numDecks: 0,
+      cutCard: 0, // 1 = 0.33, 2 = 0.5, 3 = 0.66
+    };
 
-  console.log(deck);
+    form?.addEventListener("submit", (e) => {
+      e.preventDefault();
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (typeof bankrollEl.value === "number" && bankrollEl.value > 0)
-      state.bankroll = bankrollEl.value;
+      if (!isNaN(+bankrollEl.value) && +bankrollEl.value > 0)
+        input.bankroll = +bankrollEl.value;
 
-    if (typeof runsEl.value === "number" && runsEl.value > 0)
-      state.runs = runsEl.value;
+      if (!isNaN(+runsEl.value) && +runsEl.value > 0)
+        input.runs = +runsEl.value;
 
-    state.numOfDecks = decksEl.value;
+      input.numDecks = +decksEl.value;
+      input.cutCard = +cutCardEl.value;
 
-    if (numOfDecks === 1) state.endMarker = 0;
-
-    state.endMarker = endMarkerEl.value;
+      if (input.numDecks !== 1) {
+        const game = new Game(input.numDecks, input.cutCard);
+        game.dealInitialCards();
+      } else {
+        const game = new Game();
+        game.dealInitialCards();
+      }
+    });
   });
 })();
