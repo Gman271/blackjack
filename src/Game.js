@@ -18,31 +18,84 @@ export class Game {
     console.log("🃏 Osztó: ", this.dealerHand);
   }
 
-  getNextMove() {
-    const dealerUpCard = this.dealerHand[0].value;
-    let handType;
-    let handValue = this.playerHand.reduce(
-      (sum, card) => sum + this.getCardValue(card.value),
-      0
-    );
-    let hasAce = this.playerHand.some((card) => card.value === "A");
+  getNextMove(playerHand, dealerUpCard) {
+    let handValue = this.calculateHandValue(playerHand);
+    let hasAce = playerHand.some((card) => card.value === "A");
 
     // Handtype
-    if (
-      this.playerHand.length === 2 &&
-      this.playerHand[0].value === this.playerHand[1].value
-    ) {
-      handType = "pair";
-      handValue = this.playerHand[0];
-    } else if (hasAce && handValue <= 21) {
-      handType = "soft";
-    } else {
-      handType = "hard";
-    }
+    const handType = this.determineHandType(playerHand, handValue, hasAce);
 
-    console.log(handType, handValue, hasAce);
+    console.log(`
+      A kéz értéke: ${handValue}
+      A kéz típusa: ${handType}   
+      `);
 
-    return basicStrategy[handType]?.[handValue]?.[dealerUpCard] || "Hit";
+    // NextMove
+    return this.determineMove(
+      playerHand,
+      handValue,
+      handType,
+      hasAce,
+      this.getCardValue(dealerUpCard)
+    );
+  }
+
+  determineHandType(playerHand, handValue, hasAce) {
+    if (playerHand.length === 2 && playerHand[0].value === playerHand[1].value)
+      return "pair";
+
+    if (hasAce && handValue <= 21) return "soft";
+
+    return "hard";
+  }
+
+  determineMove(playerHand, handValue, handType, hasAce, dealerUpCard) {
+    if (handType === "pair")
+      return this.handlePair(playerHand, hasAce, dealerUpCard);
+
+    if (handType === "soft") return this.handleSoft(handValue, dealerUpCard);
+
+    return this.handleHard(handValue, dealerUpCard);
+  }
+
+  handlePair(playerHand, hasAce, dealerUpCard) {
+    const pairValue =
+      playerHand[0] === "A"
+        ? this.getCardValue(playerHand[0].value) * 2 - 1
+        : this.getCardValue(playerHand[0].value) * 2;
+
+    if (pairValue === 4 || pairValue === 6 || pairValue === 14)
+      return basicStrategy.pair[4]?.[dealerUpCard];
+
+    if ((pairValue === 20 && hasAce) || pairValue === 16) return "Split";
+
+    if (pairValue === 20) return "Stand";
+
+    console.log(pairValue, dealerUpCard);
+
+    return basicStrategy.pair[pairValue]?.[dealerUpCard];
+  }
+
+  handleSoft(handValue, dealerUpCard) {
+    if (handValue > 19) return "Stand";
+
+    console.log(handValue, dealerUpCard);
+
+    return basicStrategy.soft[handValue]?.[dealerUpCard];
+  }
+
+  handleHard(handValue, dealerUpCard) {
+    if (handValue < 9) return "Hit";
+
+    if (handValue > 16) return "Stand";
+
+    console.log(handValue, dealerUpCard);
+
+    return basicStrategy.hard[handValue]?.[dealerUpCard];
+  }
+
+  calculateHandValue(hand) {
+    return hand.reduce((sum, card) => sum + this.getCardValue(card.value), 0);
   }
 
   getCardValue(value) {
