@@ -16,6 +16,8 @@ import { Game } from "./Game.js";
       const input = init();
 
       const game = createGame(input.numDecks, input.cutCard);
+
+      game.play();
     });
 
     function init() {

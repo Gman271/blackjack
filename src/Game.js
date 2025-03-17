@@ -6,6 +6,7 @@ export class Game {
     this.shoe = new Shoe(numDecks, endMarkerRatio);
     this.playerHand = [];
     this.dealerHand = [];
+    this.countValue = 0;
   }
 
   dealInitialCards() {
@@ -40,6 +41,43 @@ export class Game {
     );
   }
 
+  applyNextMove(move, handIndex = null) {
+    switch (move) {
+      case "Hit":
+        if (Array.isArray(this.playerHand[0])) {
+          this.playerHand[handIndex].push(this.shoe.draw());
+          this.playerHand.forEach((hand) => {
+            move = this.getNextMove(hand, this.dealerHand[0]);
+            this.applyNextMove(move);
+          });
+        } else {
+          this.playerHand.push(this.shoe.draw());
+          move = this.getNextMove(this.playerHand, this.dealerHand[0]);
+          this.applyNextMove(move);
+        }
+
+        return;
+      case "Stand":
+        return;
+      case "Double": // Double the stake
+        if (Array.isArray(this.playerHand[0])) {
+          this.playerHand[handIndex].push(this.shoe.draw());
+        } else {
+          this.playerHand.push(this.shoe.draw());
+        }
+        return;
+      default:
+        const firstCard = this.playerHand[0];
+        const secondCard = this.playerHand[1];
+
+        this.playerHand = [
+          [firstCard, this.shoe.draw()],
+          [secondCard, this.shoe.draw()],
+        ];
+        return;
+    }
+  }
+
   determineHandType(playerHand, handValue, hasAce) {
     if (playerHand.length === 2 && playerHand[0].value === playerHand[1].value)
       return "pair";
@@ -71,15 +109,11 @@ export class Game {
 
     if (pairValue === 20) return "Stand";
 
-    console.log(pairValue, dealerUpCard);
-
     return basicStrategy.pair[pairValue]?.[dealerUpCard];
   }
 
   handleSoft(handValue, dealerUpCard) {
     if (handValue > 19) return "Stand";
-
-    console.log(handValue, dealerUpCard);
 
     return basicStrategy.soft[handValue]?.[dealerUpCard];
   }
@@ -89,12 +123,15 @@ export class Game {
 
     if (handValue > 16) return "Stand";
 
-    console.log(handValue, dealerUpCard);
-
     return basicStrategy.hard[handValue]?.[dealerUpCard];
   }
 
   calculateHandValue(hand) {
+    if (Array.isArray(hand[0]))
+      hand.map((singleHand) =>
+        singleHand.reduce((sum, card) => sum + this.getCardValue(card.value), 0)
+      );
+
     return hand.reduce((sum, card) => sum + this.getCardValue(card.value), 0);
   }
 
@@ -102,5 +139,28 @@ export class Game {
     if (value === "A") return 11;
     if (["K", "Q", "J", "T"].includes(value)) return 10;
     return +value;
+  }
+
+  play() {
+    this.dealInitialCards();
+
+    const nextMove = this.getNextMove(
+      this.playerHand,
+      this.dealerHand[0].value
+    );
+
+    if (nextMove === "Split") {
+      this.applyNextMove(nextMove);
+
+      this.playerHand.forEach((hand, i) => {
+        let move = this.getNextMove(hand, this.dealerHand[0].value);
+        this.applyNextMove(move, i);
+      });
+    } else {
+      this.applyNextMove(nextMove);
+    }
+
+    console.log(this.playerHand);
+    console.log(this.dealerHand);
   }
 }
