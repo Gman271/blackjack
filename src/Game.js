@@ -2,7 +2,7 @@ import { Shoe } from "./Shoe.js";
 import { basicStrategy } from "./basicStrategy.js";
 
 export class Game {
-  constructor(hitOnSoft17 = true, numDecks, endMarkerRatio) {
+  constructor(numDecks, endMarkerRatio, hitOnSoft17 = true) {
     this.shoe = new Shoe(numDecks, endMarkerRatio);
     this.playerHand = [];
     this.dealerHand = [];
@@ -167,6 +167,13 @@ export class Game {
     return "Döntetlen!";
   }
 
+  reShuffleShoe() {
+    if (this.shoe.needsReshuffle()) {
+      console.log("🔄 A shoe elérte a vágókártyát. Újrakeverés...");
+      this.shoe = new Shoe(this.shoe.numDecks);
+    }
+  }
+
   resetHands() {
     this.playerHand = [];
     this.dealerHand = [];
@@ -203,6 +210,7 @@ export class Game {
     console.log(winner);
 
     this.resetHands();
+    this.reShuffleShoe();
 
     console.log(this.shoe);
   }

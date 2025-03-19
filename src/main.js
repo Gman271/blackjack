@@ -11,12 +11,15 @@ import { Game } from "./Game.js";
     /* const hitOnSoft17El = document.querySelector(".hit"); */
     const form = document.querySelector(".params-form");
 
+    const input = init();
+
+    const game = createGame(
+      /* input.hitOnSoft17, */ input.numDecks,
+      input.cutCard
+    );
+
     form?.addEventListener("submit", (e) => {
       e.preventDefault();
-
-      const input = init();
-
-      const game = createGame(input.hitOnSoft17, input.numDecks, input.cutCard);
 
       game.play();
     });
@@ -49,11 +52,11 @@ import { Game } from "./Game.js";
       return input;
     }
 
-    function createGame(hitOnSoft17, numDecks, cutCard) {
+    function createGame(/* hitOnSoft17, */ numDecks, cutCard) {
       if (numDecks !== 1) {
-        return new Game(hitOnSoft17, numDecks, cutCard);
+        return new Game(/* hitOnSoft17, */ numDecks, cutCard);
       } else {
-        return new Game(hitOnSoft17);
+        return new Game(/* hitOnSoft17 */);
       }
     }
   });

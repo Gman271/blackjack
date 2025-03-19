@@ -1,10 +1,11 @@
 import { Deck } from "./Deck.js";
 
 export class Shoe {
-  constructor(numDecks = 1, endMarkerRatio = 1) {
+  constructor(numDecks = 1, endMarkerRatio = 0.25) {
     this.numDecks = numDecks;
     this.shoe = [];
     this.endMarkerIndex = Math.floor(numDecks * 52 * endMarkerRatio);
+    this.reachedEndMarker = false;
     this.initShoe();
   }
 
@@ -25,6 +26,18 @@ export class Shoe {
   }
 
   draw() {
-    return this.shoe.pop();
+    if (this.shoe.length === 0) throw new Error("A shoe üres!");
+
+    const drawnCard = this.shoe.pop();
+
+    if (this.shoe.length <= this.endMarkerIndex) {
+      this.reachedEndMarker = true;
+    }
+
+    return drawnCard;
+  }
+
+  needsReshuffle() {
+    return this.reachedEndMarker;
   }
 }
