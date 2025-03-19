@@ -2,11 +2,12 @@ import { Shoe } from "./Shoe.js";
 import { basicStrategy } from "./basicStrategy.js";
 
 export class Game {
-  constructor(numDecks, endMarkerRatio) {
+  constructor(hitOnSoft17 = true, numDecks, endMarkerRatio) {
     this.shoe = new Shoe(numDecks, endMarkerRatio);
     this.playerHand = [];
     this.dealerHand = [];
     this.countValue = 0;
+    this.hitOnSoft17 = hitOnSoft17;
   }
 
   dealInitialCards() {
@@ -18,7 +19,12 @@ export class Game {
   }
 
   getDealerNextMove(dealerHand) {
-    return this.calculateHandValue(dealerHand) < 17 ? "Hit" : "Stand";
+    const handValue = this.calculateHandValue(dealerHand);
+    const hasAce = dealerHand.some((card) => card.value === "A");
+
+    if (this.hitOnSoft17 && handValue === 17 && hasAce) return "Hit";
+
+    return handValue < 17 ? "Hit" : "Stand";
   }
 
   applyDealerNextMove(move) {
@@ -31,8 +37,8 @@ export class Game {
   }
 
   getNextMove(playerHand, dealerUpCard) {
-    let handValue = this.calculateHandValue(playerHand);
-    let hasAce = playerHand.some((card) => card.value === "A");
+    const handValue = this.calculateHandValue(playerHand);
+    const hasAce = playerHand.some((card) => card.value === "A");
 
     // Handtype
     const handType = this.determineHandType(playerHand, handValue, hasAce);
@@ -149,12 +155,14 @@ export class Game {
     return +value;
   }
 
-  evaluateWinner(handValue, dealerHandValue) {
-    if (handValue > dealerHandValue && handValue <= 21)
-      return "A játékos nyert!";
+  evaluateWinner(playerHandValue, dealerHandValue) {
+    if (playerHandValue > 21)
+      return "Az osztó nyert! (Játékos túllépte a 21-et)";
+    if (dealerHandValue > 21)
+      return "A játékos nyert! (Osztó túllépte a 21-et)";
 
-    if (handValue < dealerHandValue && dealerHandValue <= 21)
-      return "Az osztó nyert!";
+    if (playerHandValue > dealerHandValue) return "A játékos nyert!";
+    if (playerHandValue < dealerHandValue) return "Az osztó nyert!";
 
     return "Döntetlen!";
   }
@@ -180,6 +188,8 @@ export class Game {
       );
     } else this.applyNextMove(nextMove);
 
+    console.log(nextMove);
+
     const dealerNextMove = this.getDealerNextMove(this.dealerHand);
     this.applyDealerNextMove(dealerNextMove);
 
@@ -190,10 +200,10 @@ export class Game {
 
     console.log(this.playerHand);
     console.log(this.dealerHand);
+    console.log(winner);
 
     this.resetHands();
 
-    console.log(winner);
     console.log(this.shoe);
   }
 }

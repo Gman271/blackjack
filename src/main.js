@@ -8,6 +8,7 @@ import { Game } from "./Game.js";
     const runsEl = document.getElementById("runs");
     const decksEl = document.getElementById("decks");
     const cutCardEl = document.getElementById("cut-card");
+    /* const hitOnSoft17El = document.querySelector(".hit"); */
     const form = document.querySelector(".params-form");
 
     form?.addEventListener("submit", (e) => {
@@ -15,7 +16,7 @@ import { Game } from "./Game.js";
 
       const input = init();
 
-      const game = createGame(input.numDecks, input.cutCard);
+      const game = createGame(input.hitOnSoft17, input.numDecks, input.cutCard);
 
       game.play();
     });
@@ -24,6 +25,7 @@ import { Game } from "./Game.js";
       let input = {
         bankroll: 0,
         runs: 0,
+        /* hitOnSoft17: true, */
         numDecks: 0,
         cutCard: 0, // 1 = 0.33, 2 = 0.5, 3 = 0.66
       };
@@ -38,14 +40,20 @@ import { Game } from "./Game.js";
 
       input.cutCard = +cutCardEl.value;
 
+      /* if (input.hitOnSoft17 === "true") input.hitOnSoft17 = true;
+
+      input.hitOnSoft17 = false;
+
+      console.log(input.hitOnSoft17); */
+
       return input;
     }
 
-    function createGame(numDecks, cutCard) {
+    function createGame(hitOnSoft17, numDecks, cutCard) {
       if (numDecks !== 1) {
-        return new Game(numDecks, cutCard);
+        return new Game(hitOnSoft17, numDecks, cutCard);
       } else {
-        return new Game();
+        return new Game(hitOnSoft17);
       }
     }
   });
