@@ -56,39 +56,42 @@ export class Game {
   applyNextMove(move, handIndex = null) {
     switch (move) {
       case "Hit":
-        if (Array.isArray(this.playerHand[0])) {
-          this.playerHand[handIndex].push(this.shoe.draw());
-
-          this.playerHand.forEach((hand) => {
-            move = this.getNextMove(hand, this.dealerHand[0]);
-            this.applyNextMove(move);
-          });
-        } else {
-          this.playerHand.push(this.shoe.draw());
-
-          move = this.getNextMove(this.playerHand, this.dealerHand[0]);
-          this.applyNextMove(move);
-        }
-
+        this.drawingCard(move, handIndex);
         return;
       case "Stand":
         return;
       case "Double": // Double the stake
-        if (Array.isArray(this.playerHand[0])) {
-          this.playerHand[handIndex].push(this.shoe.draw());
-        } else {
-          this.playerHand.push(this.shoe.draw());
-        }
+        this.drawingCard(move, handIndex);
         return;
-      default:
-        const firstCard = this.playerHand[0];
-        const secondCard = this.playerHand[1];
+      case "Split":
+        this.splitHand();
+        return;
+    }
+  }
 
-        this.playerHand = [
-          [firstCard, this.shoe.draw()],
-          [secondCard, this.shoe.draw()],
-        ];
-        return;
+  splitHand() {
+    const firstCard = this.playerHand[0];
+    const secondCard = this.playerHand[1];
+
+    this.playerHand = [
+      [firstCard, this.shoe.draw()],
+      [secondCard, this.shoe.draw()],
+    ];
+  }
+
+  drawingCard(move, handIndex) {
+    if (Array.isArray(this.playerHand[0])) {
+      this.playerHand[handIndex].push(this.shoe.draw());
+
+      this.playerHand.forEach((hand) => {
+        move = this.getNextMove(hand, this.dealerHand[0]);
+        this.applyNextMove(move);
+      });
+    } else {
+      this.playerHand.push(this.shoe.draw());
+
+      move = this.getNextMove(this.playerHand, this.dealerHand[0]);
+      this.applyNextMove(move);
     }
   }
 
