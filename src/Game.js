@@ -3,7 +3,8 @@ import { basicStrategy } from "./basicStrategy.js";
 
 export class Game {
   constructor(numDecks, endMarkerRatio, hitOnSoft17 = true) {
-    this.shoe = new Shoe(numDecks, endMarkerRatio);
+    this.endMarkerRatio = endMarkerRatio;
+    this.shoe = new Shoe(numDecks, this.endMarkerRatio);
     this.playerHand = [];
     this.dealerHand = [];
     this.countValue = 0;
@@ -19,6 +20,8 @@ export class Game {
   }
 
   getDealerNextMove(dealerHand) {
+    if (this.calculateHandValue(this.playerHand) > 21) return;
+
     const handValue = this.calculateHandValue(dealerHand);
     const hasAce = dealerHand.some((card) => card.value === "A");
 
@@ -36,7 +39,7 @@ export class Game {
     this.applyDealerNextMove(move);
   }
 
-  getNextMove(playerHand, dealerUpCard) {
+  getPlayerNextMove(playerHand, dealerUpCard) {
     const handValue = this.calculateHandValue(playerHand);
     const hasAce = playerHand.some((card) => card.value === "A");
 
@@ -53,7 +56,7 @@ export class Game {
     );
   }
 
-  applyNextMove(move, handIndex = null) {
+  applyPlayerNextMove(move, handIndex = null) {
     switch (move) {
       case "Hit":
         this.drawingCard(move, handIndex);
@@ -84,18 +87,20 @@ export class Game {
       this.playerHand[handIndex].push(this.shoe.draw());
 
       this.playerHand.forEach((hand) => {
-        move = this.getNextMove(hand, this.dealerHand[0]);
-        this.applyNextMove(move);
+        move = this.getPlayerNextMove(hand, this.dealerHand[0]);
+        this.applyPlayerNextMove(move);
       });
     } else {
       this.playerHand.push(this.shoe.draw());
 
-      move = this.getNextMove(this.playerHand, this.dealerHand[0]);
-      this.applyNextMove(move);
+      move = this.getPlayerNextMove(this.playerHand, this.dealerHand[0]);
+      this.applyPlayerNextMove(move);
     }
   }
 
   determineHandType(playerHand, handValue, hasAce) {
+    if (hasAce && handValue > 21) return "hard";
+
     if (playerHand.length === 2 && playerHand[0].value === playerHand[1].value)
       return "pair";
 
@@ -144,12 +149,25 @@ export class Game {
   }
 
   calculateHandValue(hand) {
-    if (Array.isArray(hand[0]))
-      hand.map((singleHand) =>
-        singleHand.reduce((sum, card) => sum + this.getCardValue(card.value), 0)
-      );
+    if (Array.isArray(hand[0])) {
+      return hand.map((singleHand) => this.calculateHandValue(singleHand));
+    }
 
-    return hand.reduce((sum, card) => sum + this.getCardValue(card.value), 0);
+    let sum = 0;
+    let aceCount = 0;
+
+    for (const card of hand) {
+      let cardValue = this.getCardValue(card.value);
+      if (cardValue === 11) aceCount++;
+      sum += cardValue;
+    }
+
+    while (sum > 21 && aceCount > 0) {
+      sum -= 10;
+      aceCount--;
+    }
+
+    return sum;
   }
 
   getCardValue(value) {
@@ -159,21 +177,28 @@ export class Game {
   }
 
   evaluateWinner(playerHandValue, dealerHandValue) {
-    if (playerHandValue > 21)
-      return "Az osztó nyert! (Játékos túllépte a 21-et)";
-    if (dealerHandValue > 21)
-      return "A játékos nyert! (Osztó túllépte a 21-et)";
+    const hands = Array.isArray(playerHandValue)
+      ? playerHandValue
+      : [playerHandValue];
 
-    if (playerHandValue > dealerHandValue) return "A játékos nyert!";
-    if (playerHandValue < dealerHandValue) return "Az osztó nyert!";
+    const results = hands.map((handValue) => {
+      if (handValue > 21) return "Az osztó nyert! (Játékos túllépte a 21-et)";
+      if (dealerHandValue > 21)
+        return "A játékos nyert! (Osztó túllépte a 21-et)";
 
-    return "Döntetlen!";
+      if (handValue > dealerHandValue) return "A játékos nyert!";
+      if (handValue < dealerHandValue) return "Az osztó nyert!";
+
+      return "Döntetlen!";
+    });
+
+    return results.length === 1 ? results[0] : results;
   }
 
   reShuffleShoe() {
     if (this.shoe.needsReshuffle()) {
       console.log("🔄 A shoe elérte a vágókártyát. Újrakeverés...");
-      this.shoe = new Shoe(this.shoe.numDecks);
+      this.shoe = new Shoe(this.shoe.numDecks, this.endMarkerRatio);
     }
   }
 
@@ -185,18 +210,21 @@ export class Game {
   play() {
     this.dealInitialCards();
 
-    const nextMove = this.getNextMove(
+    const nextMove = this.getPlayerNextMove(
       this.playerHand,
       this.dealerHand[0].value
     );
 
     if (nextMove === "Split") {
-      this.applyNextMove(nextMove);
+      this.applyPlayerNextMove(nextMove);
 
       this.playerHand.forEach((hand, i) =>
-        this.applyNextMove(this.getNextMove(hand, this.dealerHand[0].value), i)
+        this.applyPlayerNextMove(
+          this.getPlayerNextMove(hand, this.dealerHand[0].value),
+          i
+        )
       );
-    } else this.applyNextMove(nextMove);
+    } else this.applyPlayerNextMove(nextMove);
 
     console.log(nextMove);
 
