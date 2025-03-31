@@ -1,4 +1,4 @@
-import { SUITS, VALUES } from "./conf.js";
+import { SUITS, VALUES } from "../conf.js";
 
 export class Deck {
   constructor(suits = SUITS, values = VALUES) {

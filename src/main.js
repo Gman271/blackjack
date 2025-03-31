@@ -1,6 +1,7 @@
 "use strict";
-
-import { Game } from "./Game.js";
+import { Strategy } from "./strategy/Strategy.js";
+import { Game } from "./game/Game.js";
+import { Hand } from "./components/Hand.js";
 
 (() => {
   document.addEventListener("DOMContentLoaded", () => {
@@ -25,7 +26,7 @@ import { Game } from "./Game.js";
     document.getElementById("init").addEventListener("click", () => {
       init();
 
-      game = createGame(input.numDecks, input.cutCard, input.hitOnSoft17);
+      game = createGame(input.numDecks, input.cutCard, hitOnSoft17El);
     });
 
     form?.addEventListener("submit", (e) => {
