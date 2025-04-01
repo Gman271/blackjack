@@ -15,25 +15,16 @@ export class Strategy {
   static getPlayerNextMove(playerHand, dealerHand) {
     if (playerHand.isDoubled) return "Stand";
 
-    let move = Strategy.determineMove({
+    let nextMove = Strategy.determineMove({
       handValue: String(playerHand.handValue),
       handType: playerHand.handType,
       hasAce: playerHand.hasAce(),
       dealerUpCard: String(dealerHand.upCardValue),
     });
 
-    while (move === "Double" && playerHand.cards.length > 2) {
-      move = Strategy.determineMove({
-        handValue: String(playerHand.handValue),
-        handType: playerHand.handType,
-        hasAce: playerHand.hasAce(),
-        dealerUpCard: String(dealerHand.upCardValue),
-      });
+    if (nextMove === "Double" && playerHand.cards.length > 2) nextMove = "Hit";
 
-      if (move === "Double") move = "Hit";
-    }
-
-    return move;
+    return nextMove;
   }
 
   static determineMove({ handValue, handType, hasAce, dealerUpCard }) {

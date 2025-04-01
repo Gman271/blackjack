@@ -9,6 +9,10 @@ export class Player {
     return this.hands[index];
   }
 
+  get runningCount() {
+    return this.hands.reduce((sum, hand) => sum + hand.runningCount, 0);
+  }
+
   resetHand() {
     this.hands = [new Hand()];
   }
@@ -18,7 +22,6 @@ export class Player {
   }
 
   splitHand(shoe, handIndex = 0) {
-    console.log(this.hands);
     if (this.getHand(handIndex).handType !== "pair") return;
 
     if (this.hands.length >= 4) return;

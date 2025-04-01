@@ -26,6 +26,10 @@ export class Hand {
     return this.#handType;
   }
 
+  get runningCount() {
+    return this.cards.reduce((sum, card) => sum + card.countValue, 0);
+  }
+
   doubleDown(shoe) {
     if (this.cards.length !== 2) return;
 

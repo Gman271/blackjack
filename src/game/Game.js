@@ -10,6 +10,7 @@ export class Game {
     this.player = new Player();
     this.dealer = new Dealer();
     this.hitOnSoft17 = hitOnSoft17;
+    this.runningCount = 0;
   }
 
   dealInitialCards() {
@@ -18,6 +19,8 @@ export class Game {
     this.dealer.hand.addCard(this.shoe.draw());
     this.dealer.hand.addCard(this.shoe.draw());
 
+    this.updateRunningCount();
+
     console.log("👤 Játékos: ", this.player.getHand().cards);
     console.log("🃏 Osztó: ", this.dealer.hand.cards);
   }
@@ -25,8 +28,13 @@ export class Game {
   play() {
     this.dealInitialCards();
 
+    console.log(this.runningCount);
     this.playerTurn();
+
+    console.log(this.runningCount);
     this.dealerTurn();
+
+    console.log(this.runningCount);
 
     const result = this.evaluateWinner();
     console.log(result);
@@ -42,6 +50,8 @@ export class Game {
     };
 
     actions[move]?.();
+
+    this.updateRunningCount();
   }
 
   playerTurn() {
@@ -75,11 +85,11 @@ export class Game {
     ) {
       this.dealer.hand.addCard(this.shoe.draw());
     }
+    this.updateRunningCount();
   }
 
   evaluateWinner() {
     const dealerHandValue = this.dealer.hand.handValue;
-    console.log(dealerHandValue);
     return this.player.hands
       .map((hand) => {
         const playerHandValue = hand.handValue;
@@ -95,6 +105,11 @@ export class Game {
         return "Döntetlen!";
       })
       .join("\n");
+  }
+
+  updateRunningCount() {
+    this.runningCount =
+      this.player.runningCount + this.dealer.hand.runningCount;
   }
 
   resetGame() {
