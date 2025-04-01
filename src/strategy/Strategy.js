@@ -13,14 +13,27 @@ export class Strategy {
   }
 
   static getPlayerNextMove(playerHand, dealerHand) {
-    const props = {
+    if (playerHand.isDoubled) return "Stand";
+
+    let move = Strategy.determineMove({
       handValue: String(playerHand.handValue),
       handType: playerHand.handType,
       hasAce: playerHand.hasAce(),
       dealerUpCard: String(dealerHand.upCardValue),
-    };
+    });
 
-    return Strategy.determineMove(props);
+    while (move === "Double" && playerHand.cards.length > 2) {
+      move = Strategy.determineMove({
+        handValue: String(playerHand.handValue),
+        handType: playerHand.handType,
+        hasAce: playerHand.hasAce(),
+        dealerUpCard: String(dealerHand.upCardValue),
+      });
+
+      if (move === "Double") move = "Hit";
+    }
+
+    return move;
   }
 
   static determineMove({ handValue, handType, hasAce, dealerUpCard }) {

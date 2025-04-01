@@ -45,7 +45,6 @@ export class Game {
   }
 
   playerTurn() {
-    console.log(this.player.getHand().handValue);
     this.player.hands.forEach((hand, index) => {
       let move;
       while (
@@ -53,16 +52,16 @@ export class Game {
           "Stand" &&
         move !== undefined
       ) {
-        console.log(move);
         this.applyPlayerNextMove(move, index);
 
+        hand = this.player.getHand(index);
+
         if (hand.isDoubled) {
-          console.log("Player doubled, they are no more moves!");
+          move = "Stand";
           break;
         }
       }
     });
-    console.log(this.player.getHand().handValue);
   }
 
   dealerTurn() {
