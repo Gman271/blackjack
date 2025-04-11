@@ -13,13 +13,19 @@ export class Game {
     this.runningCount = 0;
   }
 
-  dealInitialCards() {
-    this.player.getHand().addCard(this.shoe.draw());
-    this.player.getHand().addCard(this.shoe.draw());
-    this.dealer.hand.addCard(this.shoe.draw());
-    this.dealer.hand.addCard(this.shoe.draw());
+  get trueCount() {
+    return Math.floor(this.runningCount / this.shoe.remainingDecks);
+  }
 
-    this.updateRunningCount();
+  dealInitialCards() {
+    const playerHand = this.player.getHand();
+    const dealerHand = this.dealer.hand;
+
+    [playerHand, playerHand, dealerHand, dealerHand].forEach((target) => {
+      const card = this.shoe.draw();
+      target.addCard(card);
+      this.runningCount += card.countValue;
+    });
 
     console.log("👤 Játékos: ", this.player.getHand().cards);
     console.log("🃏 Osztó: ", this.dealer.hand.cards);
@@ -28,13 +34,13 @@ export class Game {
   play() {
     this.dealInitialCards();
 
-    console.log(this.runningCount);
     this.playerTurn();
 
-    console.log(this.runningCount);
     this.dealerTurn();
 
-    console.log(this.runningCount);
+    console.log(this.shoe);
+    console.log(this.shoe.remainingDecks);
+    console.log(this.trueCount);
 
     const result = this.evaluateWinner();
     console.log(result);
@@ -44,14 +50,20 @@ export class Game {
 
   applyPlayerNextMove(move, handIndex = 0) {
     const actions = {
-      Hit: () => this.player.getHand(handIndex).addCard(this.shoe.draw()),
-      Double: () => this.player.doubleDown(this.shoe, handIndex),
+      Hit: () => {
+        const newCard = this.shoe.draw();
+        this.player.getHand(handIndex).addCard(newCard);
+        this.runningCount += newCard.countValue;
+      },
+      Double: () => {
+        const newCard = this.shoe.draw();
+        this.player.doubleDown(this.shoe, handIndex);
+        this.runningCount += newCard.countValue;
+      },
       Split: () => this.player.splitHand(this.shoe, handIndex),
     };
 
     actions[move]?.();
-
-    this.updateRunningCount();
   }
 
   playerTurn() {
@@ -83,9 +95,10 @@ export class Game {
         this.hitOnSoft17
       )) === "Hit"
     ) {
-      this.dealer.hand.addCard(this.shoe.draw());
+      const newCard = this.shoe.draw();
+      this.dealer.hand.addCard(newCard);
+      this.runningCount += newCard.countValue;
     }
-    this.updateRunningCount();
   }
 
   evaluateWinner() {
@@ -107,17 +120,13 @@ export class Game {
       .join("\n");
   }
 
-  updateRunningCount() {
-    this.runningCount =
-      this.player.runningCount + this.dealer.hand.runningCount;
-  }
-
   resetGame() {
     this.player.resetHand();
     this.dealer.resetHand();
     if (this.shoe.reachedEndMarker) {
       console.log("🔄 A shoe elérte a vágókártyát. Újrakeverés...");
       this.shoe = new Shoe(this.shoe.numDecks, this.endMarkerRatio);
+      this.runningCount = 0;
     }
   }
 }

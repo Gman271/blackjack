@@ -9,6 +9,10 @@ export class Shoe {
     this.initShoe();
   }
 
+  get remainingDecks() {
+    return +(this.shoe.length / 52).toFixed(2);
+  }
+
   initShoe() {
     for (let i = 0; i < this.numDecks; i++) {
       const deck = new Deck();
@@ -36,6 +40,8 @@ export class Shoe {
   }
 
   needsReshuffle() {
-    if (this.shoe.length <= this.endMarkerIndex) this.reachedEndMarker = true;
+    if (this.shoe.length <= this.endMarkerIndex) {
+      this.reachedEndMarker = true;
+    }
   }
 }
