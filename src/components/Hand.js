@@ -14,6 +14,17 @@ export class Hand {
     this.#updateHand();
   }
 
+  doubleDown(shoe) {
+    if (this.cards.length !== 2) return;
+
+    this.isDoubled = true;
+    this.addCard(shoe.draw());
+  }
+
+  hasAce() {
+    return this.cards.some((card) => card.value === "A");
+  }
+
   get upCardValue() {
     return this.#getCardValue(this.cards[0].value);
   }
@@ -30,15 +41,8 @@ export class Hand {
     return this.cards.reduce((sum, card) => sum + card.countValue, 0);
   }
 
-  doubleDown(shoe) {
-    if (this.cards.length !== 2) return;
-
-    this.isDoubled = true;
-    this.addCard(shoe.draw());
-  }
-
-  hasAce() {
-    return this.cards.some((card) => card.value === "A");
+  get isBlackJack() {
+    return this.cards.length === 2 && this.handValue === 21;
   }
 
   #isPair() {

@@ -1,4 +1,4 @@
-export const DECK_LENGTH = 52;
+export const KELLY_MULTIPLIER = 0.75;
 
 export const SUITS = ["S", "H", "C", "D"];
 export const VALUES = [

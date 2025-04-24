@@ -11,7 +11,11 @@
       <div class="params">
         <form class="params-form">
           <input type="number" id="bankroll" placeholder="Starting bankroll" />
-          <input type="number" id="runs" placeholder="Number of runs" />
+          <input
+            type="number"
+            id="plays"
+            placeholder="Number of hands played"
+          />
           <label for="decks">Number of decks:</label>
           <select id="decks">
             <option value="1">1</option>
@@ -27,9 +31,9 @@
             <option value="0.5">~1/2</option>
             <option value="0.33">~2/3</option>
           </select>
-          <input type="radio" class="hit" name="hit" value="false" />
+          <input type="radio" class="hit" name="hit" value="false" checked />
           <label for="hit">Az osztó megáll soft 17-nél</label>
-          <input type="radio" class="hit" name="hit" value="true" checked />
+          <input type="radio" class="hit" name="hit" value="true" />
           <label for="hit">Az osztó nem áll meg soft 17-nél</label>
           <input type="submit" value="START" />
         </form>

@@ -3,18 +3,17 @@ import { Player } from "../actors/Player.js";
 import { Dealer } from "../actors/Dealer.js";
 
 import { Strategy } from "../strategy/Strategy.js";
+import { BetStrategy } from "../strategy/BetStrategy.js";
 
 export class Game {
-  constructor(numDecks, endMarkerRatio, hitOnSoft17 = true) {
+  constructor(numDecks, endMarkerRatio, hitOnSoft17 = true, bankroll = 300000) {
     this.shoe = new Shoe(numDecks, endMarkerRatio);
-    this.player = new Player();
+    this.player = new Player(bankroll);
     this.dealer = new Dealer();
+    this.betStr = new BetStrategy();
     this.hitOnSoft17 = hitOnSoft17;
+    this.initBankroll = bankroll;
     this.runningCount = 0;
-  }
-
-  get trueCount() {
-    return Math.floor(this.runningCount / this.shoe.remainingDecks);
   }
 
   dealInitialCards() {
@@ -32,15 +31,17 @@ export class Game {
   }
 
   play() {
+    console.log(this.player.bankroll);
+    this.player.placeBet(this.bet);
+
+    console.log(this.bet);
+    console.log(this.player.bankroll);
+
     this.dealInitialCards();
 
     this.playerTurn();
 
     this.dealerTurn();
-
-    console.log(this.shoe);
-    console.log(this.shoe.remainingDecks);
-    console.log(this.trueCount);
 
     const result = this.evaluateWinner();
     console.log(result);
@@ -60,7 +61,9 @@ export class Game {
         this.player.doubleDown(this.shoe, handIndex);
         this.runningCount += newCard.countValue;
       },
-      Split: () => this.player.splitHand(this.shoe, handIndex),
+      Split: () => {
+        this.player.splitHand(this.shoe, handIndex);
+      },
     };
 
     actions[move]?.();
@@ -103,19 +106,44 @@ export class Game {
 
   evaluateWinner() {
     const dealerHandValue = this.dealer.hand.handValue;
+    const dealerHasBj = this.dealer.hand.isBlackJack;
+
     return this.player.hands
-      .map((hand) => {
+      .map((hand, i) => {
         const playerHandValue = hand.handValue;
+        const playerHasBj = hand.isBlackJack;
+
+        if (playerHasBj && !dealerHasBj) {
+          this.player.addWinnings(this.player.bets[i] * 2.5);
+          return "🂡 Blackjack! A játékos nyert (3:2)!";
+        }
+
+        if (playerHasBj && dealerHasBj) {
+          this.player.addWinnings(this.player.bets[i]);
+          return "🤝 Mindkettő blackjack - döntetlen!";
+        }
+
+        if (!playerHasBj && dealerHasBj) {
+          return "Az osztó blackjack - játékos veszített.";
+        }
 
         if (playerHandValue > 21)
           return "Az osztó nyert! (Játékos túllépte a 21-et)";
-        if (dealerHandValue > 21)
+        if (dealerHandValue > 21) {
+          this.player.addWinnings(this.player.bets[i] * 2);
           return "A játékos nyert! (Osztó túllépte a 21-et)";
+        }
 
-        if (playerHandValue > dealerHandValue) return "A játékos nyert!";
-        if (playerHandValue < dealerHandValue) return "Az osztó nyert!";
+        if (playerHandValue > dealerHandValue) {
+          this.player.addWinnings(this.player.bets[i] * 2);
+          return "A játékos nyert!";
+        }
+        if (playerHandValue === dealerHandValue) {
+          this.player.addWinnings(this.player.bets[i]);
+          return "Döntetlen!";
+        }
 
-        return "Döntetlen!";
+        return "Az osztó nyert!";
       })
       .join("\n");
   }
@@ -128,5 +156,13 @@ export class Game {
       this.shoe = new Shoe(this.shoe.numDecks, this.endMarkerRatio);
       this.runningCount = 0;
     }
+  }
+
+  get trueCount() {
+    return Math.floor(this.runningCount / this.shoe.remainingDecks);
+  }
+
+  get bet() {
+    return this.betStr.getBet(this.trueCount, this.initBankroll);
   }
 }
