@@ -3,12 +3,12 @@ import { Game } from "./src/game/Game.js";
 
 (() => {
   document.addEventListener("DOMContentLoaded", () => {
-    const bankrollEl = document.getElementById("bankroll");
-    const playsEl = document.getElementById("plays");
-    const decksEl = document.getElementById("decks");
-    const cutCardEl = document.getElementById("cut-card");
+    const bankrollEl = document.querySelector(".bankroll-ipt");
+    const playsEl = document.querySelector(".plays-ipt");
+    const decksEl = document.querySelector(".decks-slt");
+    const cutCardEl = document.querySelector(".cutcard-slt");
 
-    const hitOnSoft17El = document.querySelector(".hit");
+    const hitOnSoft17El = document.querySelector(".hit-ipt");
 
     const form = document.querySelector(".params-form");
 
@@ -22,10 +22,15 @@ import { Game } from "./src/game/Game.js";
 
     let game;
 
-    document.getElementById("init").addEventListener("click", () => {
+    document.querySelector(".init-btn").addEventListener("click", () => {
       init();
 
-      game = createGame(input.numDecks, input.cutCard, input.hitOnSoft17);
+      game = createGame(
+        input.numDecks,
+        input.cutCard,
+        input.hitOnSoft17,
+        input.bankroll
+      );
     });
 
     form?.addEventListener("submit", (e) => {
