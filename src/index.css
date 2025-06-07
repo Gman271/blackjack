@@ -13,6 +13,13 @@ body {
 
 .form-container {
   background-image: url(./heather-green-bH1X0C-H4ww-unsplash.jpg);
+  display: flex;
+  align-items: center;
+}
+
+.btn-container {
+  display: flex;
+  flex-direction: column;
 }
 
 .params-form {
@@ -53,7 +60,7 @@ input[type="submit"]:hover {
   background-color: #096;
 }
 
-.init-btn {
+.btn {
   font-family: inherit;
   font-size: large;
   margin: 1rem auto;
@@ -66,6 +73,6 @@ input[type="submit"]:hover {
   cursor: pointer;
 }
 
-.init-btn:hover {
+.btn:hover {
   background-color: #505050;
 }

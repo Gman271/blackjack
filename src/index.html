@@ -46,11 +46,21 @@
           />
           <label for="hit">Dealer hit on soft 17</label>
           <input type="radio" class="ipt hit-ipt" name="hit" value="true" />
-          <button class="init-btn">INIT</button>
+
           <input type="submit" class="submit-btn" value="PLAY HANDS" />
         </form>
+        <div class="btn-container">
+          <button class="btn init-btn">INIT</button>
+          <button class="btn chart-btn">GENERATE CHART</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <div class="profit"><canvas id="profit-chart"></canvas></div>
+        <div class="bankroll"><canvas id="bankroll-chart"></canvas></div>
       </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script type="module" src="main.js"></script>
   </body>

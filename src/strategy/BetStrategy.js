@@ -1,4 +1,4 @@
-import { KELLY_MULTIPLIER } from "../../conf.js";
+import { KELLY_MULTIPLIER } from "../conf.js";
 
 export class BetStrategy {
   constructor(maxBet = 10000) {

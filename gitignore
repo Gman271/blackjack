@@ -1,0 +1,12 @@
+# Build folders
+dist/
+.parcel-cache/
+
+# Node.js moduls
+node_modules/
+
+# Log files, cache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
