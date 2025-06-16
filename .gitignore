@@ -1,6 +1,7 @@
 # Build folders
 dist/
 .parcel-cache/
+coverage/
 
 # Node.js moduls
 node_modules/

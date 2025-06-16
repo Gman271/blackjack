@@ -47,7 +47,7 @@ import Chart from "chart.js/auto";
         type: "bar",
         data: {
           labels: outputs.map(
-            (row, i) => `play #${i}. ${row.playedHands} hands played`
+            (row, i) => `play #${i + 1}. ${row.playedHands} hands played`
           ),
           datasets: [
             {
@@ -88,7 +88,9 @@ import Chart from "chart.js/auto";
       });
 
       if (chart) {
-        chart.data.labels = outputs.map((row) => row.playedHands);
+        chart.data.labels = outputs.map(
+          (row, i) => `play #${i + 1}. ${row.playedHands} hands played`
+        );
         chart.data.datasets[0].data = outputs.map(
           (row) => row.profitPerPlayedHands
         );

@@ -34,14 +34,8 @@ export class Shoe {
 
     const drawnCard = this.shoe.pop();
 
-    this.needsReshuffle();
+    if (this.shoe.length <= this.endMarkerIndex) this.reachedEndMarker = true;
 
     return drawnCard;
-  }
-
-  needsReshuffle() {
-    if (this.shoe.length <= this.endMarkerIndex) {
-      this.reachedEndMarker = true;
-    }
   }
 }

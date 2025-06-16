@@ -7,16 +7,17 @@ export class Player {
     this.bets = [0];
   }
 
+  get runningCount() {
+    return this.hands.reduce((sum, hand) => sum + hand.runningCount, 0);
+  }
+
   getHand(index = 0) {
     return this.hands[index];
   }
 
-  placeBet(betAmount, handIndex = 0) {
-    if (betAmount > this.bankroll)
-      throw new Error("Player has not enough chips!");
-
-    this.bankroll -= betAmount;
-    this.bets[handIndex] = betAmount;
+  placeBet(amount, index = 0) {
+    this.#deductBankroll(amount);
+    this.bets[index] = amount;
   }
 
   addWinnings(amount) {
@@ -28,48 +29,45 @@ export class Player {
     this.bets = [0];
   }
 
-  doubleDown(shoe, handIndex = 0) {
-    this.hands[handIndex].doubleDown(shoe);
-    const bet = this.bets[handIndex];
+  doubleDown(shoe, index = 0) {
+    const hand = this.getHand(index);
+    const bet = this.bets[index];
 
-    if (bet > this.bankroll) throw new Error("Player has not enough chips!");
-
-    this.bankroll -= bet;
-    this.bets[handIndex] = bet * 2;
-
-    console.log(this.bankroll);
-    console.log("Player has doubled down!");
+    this.#deductBankroll(bet);
+    hand.doubleDown(shoe);
+    this.bets[index] = bet * 2;
   }
 
-  splitHand(shoe, handIndex = 0) {
-    if (this.getHand(handIndex).handType !== "pair") return;
+  splitHand(shoe, index = 0) {
+    const hand = this.getHand(index);
 
-    if (this.hands.length >= 4) return;
+    if (hand.handType !== "pair" || this.hands.length >= 4) return;
 
-    const bet = this.bets[handIndex];
-    if (bet > this.bankroll) {
+    const bet = this.bets[index];
+
+    this.#deductBankroll(bet);
+
+    const [card1, card2] = hand.cards;
+
+    const newHand1 = createSplitHand(card1, shoe);
+    const newHand2 = createSplitHand(card2, shoe);
+
+    this.hands[index] = newHand1;
+    this.hands.push(newHand2);
+    this.bets.push(bet);
+  }
+
+  #deductBankroll(amount) {
+    if (amount > this.bankroll) {
       throw new Error("Player has not enough chips!");
     }
-
-    const firstCard = this.hands[handIndex].cards[0];
-    const secondCard = this.hands[handIndex].cards[1];
-
-    this.hands[handIndex] = new Hand();
-    this.hands[handIndex].addCard(firstCard);
-    this.hands[handIndex].addCard(shoe.draw());
-
-    const newHand = new Hand();
-    newHand.addCard(secondCard);
-    newHand.addCard(shoe.draw());
-
-    this.hands.push(newHand);
-    this.bankroll -= this.bets[handIndex];
-    this.bets.push(this.bets[handIndex]);
-    console.log(this.bankroll);
-    console.log("Player has splitted!");
+    this.bankroll -= amount;
   }
+}
 
-  get runningCount() {
-    return this.hands.reduce((sum, hand) => sum + hand.runningCount, 0);
-  }
+function createSplitHand(card, shoe) {
+  const hand = new Hand();
+  hand.addCard(card);
+  hand.addCard(shoe.draw());
+  return hand;
 }

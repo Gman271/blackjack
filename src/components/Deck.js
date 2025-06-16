@@ -8,11 +8,10 @@ export class Deck {
         this.cards.push({ suit, value, countValue: this.assignValues(value) });
       }
     }
-    this.assignValues();
   }
 
   assignValues(value) {
-    switch (value) {
+    switch (String(value)) {
       case "2":
       case "3":
       case "4":

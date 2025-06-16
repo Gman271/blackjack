@@ -1,12 +1,15 @@
 {
+  "type": "module",
   "name": "chartjs-example",
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
     "dev": "parcel src/index.html",
-    "build": "parcel build src/index.html"
+    "build": "parcel build src/index.html",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "devDependencies": {
+    "jest": "^30.0.0",
     "parcel": "^2.6.2"
   },
   "dependencies": {
