@@ -75,7 +75,7 @@ import Chart from "chart.js/auto";
       const previousBankroll = game.player.bankroll;
 
       for (let i = 0; i <= input.plays; i++) {
-        game.play();
+        game.playRound();
       }
 
       const actualBankroll = game.player.bankroll;

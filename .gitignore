@@ -3,7 +3,7 @@ dist/
 .parcel-cache/
 coverage/
 
-# Node.js moduls
+# Node.js modules
 node_modules/
 
 # Log files, cache

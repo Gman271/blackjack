@@ -1,6 +1,15 @@
 import { Deck } from "./Deck.js";
 
+/**
+ * The Shoe class represents a shuffled stack of cards composed of multiple decks.
+ * It is used for Blackjack games, where the shoe is reshuffled after reaching the cut card.
+ */
 export class Shoe {
+  /**
+   * Constructs a new Shoe instance
+   * @param {number} numDecks - Number of decks to include in the shoe
+   * @param {number} endMarkerRatio - Ratio indicating when the cut card is placed (e.g., 0.75 means 75% of the shoe will be played).
+   */
   constructor(numDecks = 1, endMarkerRatio = 0.25) {
     this.numDecks = numDecks;
     this.shoe = [];

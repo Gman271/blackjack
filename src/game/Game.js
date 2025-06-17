@@ -5,6 +5,8 @@ import { Dealer } from "../actors/Dealer.js";
 import { Strategy } from "../strategy/Strategy.js";
 import { BetStrategy } from "../strategy/BetStrategy.js";
 
+import { MOVES } from "../conf.js";
+
 export class Game {
   constructor(numDecks, endMarkerRatio, hitOnSoft17 = true, bankroll = 300000) {
     this.shoe = new Shoe(numDecks, endMarkerRatio);
@@ -16,6 +18,14 @@ export class Game {
     this.runningCount = 0;
   }
 
+  get trueCount() {
+    return Math.floor(this.runningCount / this.shoe.remainingDecks);
+  }
+
+  get bet() {
+    return this.betStr.getBet(this.trueCount, this.initBankroll);
+  }
+
   dealInitialCards() {
     const playerHand = this.player.getHand();
     const dealerHand = this.dealer.hand;
@@ -25,43 +35,32 @@ export class Game {
       target.addCard(card);
       this.runningCount += card.countValue;
     });
-
-    console.log("👤 Játékos: ", this.player.getHand().cards);
-    console.log("🃏 Osztó: ", this.dealer.hand.cards);
   }
 
-  play() {
-    console.log(this.player.bankroll);
-    this.player.placeBet(this.bet);
-
-    console.log(this.bet);
-    console.log(this.player.bankroll);
-
+  playRound() {
+    this.player.placeBet();
     this.dealInitialCards();
-
     this.playerTurn();
-
     this.dealerTurn();
-
     const result = this.evaluateWinner();
-    console.log(result);
+    this.resetRound();
 
-    this.resetGame();
+    return result;
   }
 
   applyPlayerNextMove(move, handIndex = 0) {
     const actions = {
-      Hit: () => {
+      [MOVES.HIT]: () => {
         const newCard = this.shoe.draw();
         this.player.getHand(handIndex).addCard(newCard);
         this.runningCount += newCard.countValue;
       },
-      Double: () => {
+      [MOVES.DOUBLE]: () => {
         const newCard = this.shoe.draw();
         this.player.doubleDown(this.shoe, handIndex);
         this.runningCount += newCard.countValue;
       },
-      Split: () => {
+      [MOVES.SPLIT]: () => {
         this.player.splitHand(this.shoe, handIndex);
       },
     };
@@ -74,17 +73,13 @@ export class Game {
       let move;
       while (
         (move = Strategy.getPlayerNextMove(hand, this.dealer.hand)) !==
-          "Stand" &&
+          MOVES.STAND &&
         move !== undefined
       ) {
         this.applyPlayerNextMove(move, index);
-
         hand = this.player.getHand(index);
 
-        if (hand.isDoubled) {
-          move = "Stand";
-          break;
-        }
+        if (hand.isDoubled) break;
       }
     });
   }
@@ -96,7 +91,7 @@ export class Game {
         this.player.hands,
         this.dealer.hand,
         this.hitOnSoft17
-      )) === "Hit"
+      )) === MOVES.HIT
     ) {
       const newCard = this.shoe.draw();
       this.dealer.hand.addCard(newCard);
@@ -105,50 +100,63 @@ export class Game {
   }
 
   evaluateWinner() {
-    const dealerHandValue = this.dealer.hand.handValue;
-    const dealerHasBj = this.dealer.hand.isBlackJack;
+    if (this.player.hands.length !== this.player.bets.length) {
+      throw new Error(
+        "The number of player hands does not match the number of bets!"
+      );
+    }
 
     return this.player.hands
       .map((hand, i) => {
-        const playerHandValue = hand.handValue;
-        const playerHasBj = hand.isBlackJack;
-
-        if (playerHasBj && !dealerHasBj) {
-          this.player.addWinnings(this.player.bets[i] * 2.5);
-          return "🂡 Blackjack! A játékos nyert (3:2)!";
-        }
-
-        if (playerHasBj && dealerHasBj) {
-          this.player.addWinnings(this.player.bets[i]);
-          return "🤝 Mindkettő blackjack - döntetlen!";
-        }
-
-        if (!playerHasBj && dealerHasBj) {
-          return "Az osztó blackjack - játékos veszített.";
-        }
-
-        if (playerHandValue > 21)
-          return "Az osztó nyert! (Játékos túllépte a 21-et)";
-        if (dealerHandValue > 21) {
-          this.player.addWinnings(this.player.bets[i] * 2);
-          return "A játékos nyert! (Osztó túllépte a 21-et)";
-        }
-
-        if (playerHandValue > dealerHandValue) {
-          this.player.addWinnings(this.player.bets[i] * 2);
-          return "A játékos nyert!";
-        }
-        if (playerHandValue === dealerHandValue) {
-          this.player.addWinnings(this.player.bets[i]);
-          return "Döntetlen!";
-        }
-
-        return "Az osztó nyert!";
+        return this.evaluateHandResult(
+          hand,
+          this.dealer.hand,
+          this.player.bets[i]
+        );
       })
       .join("\n");
   }
 
-  resetGame() {
+  evaluateHandResult(hand, dealerHand, bet) {
+    const dealerHandValue = dealerHand.handValue;
+    const dealerHasBj = dealerHand.isBlackJack;
+    const playerHandValue = hand.handValue;
+    const playerHasBj = hand.isBlackJack;
+
+    if (playerHasBj && !dealerHasBj) {
+      this.player.addWinnings(bet * 2.5);
+      return "🂡 Blackjack! A játékos nyert (3:2)!";
+    }
+
+    if (playerHasBj && dealerHasBj) {
+      this.player.addWinnings(bet);
+      return "🤝 Mindkettő blackjack - döntetlen!";
+    }
+
+    if (!playerHasBj && dealerHasBj) {
+      return "Az osztó blackjack - játékos veszített.";
+    }
+
+    if (playerHandValue > 21)
+      return "Az osztó nyert! (Játékos túllépte a 21-et)";
+    if (dealerHandValue > 21) {
+      this.player.addWinnings(bet * 2);
+      return "A játékos nyert! (Osztó túllépte a 21-et)";
+    }
+
+    if (playerHandValue > dealerHandValue) {
+      this.player.addWinnings(bet * 2);
+      return "A játékos nyert!";
+    }
+    if (playerHandValue === dealerHandValue) {
+      this.player.addWinnings(bet);
+      return "Döntetlen!";
+    }
+
+    return "Az osztó nyert!";
+  }
+
+  resetRound() {
     this.player.resetHand();
     this.dealer.resetHand();
     if (this.shoe.reachedEndMarker) {
@@ -156,13 +164,5 @@ export class Game {
       this.shoe = new Shoe(this.shoe.numDecks, this.endMarkerRatio);
       this.runningCount = 0;
     }
-  }
-
-  get trueCount() {
-    return Math.floor(this.runningCount / this.shoe.remainingDecks);
-  }
-
-  get bet() {
-    return this.betStr.getBet(this.trueCount, this.initBankroll);
   }
 }

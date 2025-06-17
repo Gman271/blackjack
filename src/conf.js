@@ -1,5 +1,12 @@
 export const KELLY_MULTIPLIER = 0.75;
 
+export const MOVES = {
+  HIT: "Hit",
+  STAND: "Stand",
+  DOUBLE: "Double",
+  SPLIT: "Split",
+};
+
 export const SUITS = ["S", "H", "C", "D"];
 export const VALUES = [
   "A",
