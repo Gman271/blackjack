@@ -3,57 +3,99 @@ import { Game } from "./game/Game.js";
 
 (() => {
   document.addEventListener("DOMContentLoaded", () => {
-    const bankrollEl = document.querySelector(".bankroll-ipt");
-    const playsEl = document.querySelector(".plays-ipt");
-    const decksEl = document.querySelector(".decks-slt");
-    const cutCardEl = document.querySelector(".cutcard-slt");
-
-    const form = document.querySelector(".params-form");
-
-    let chart = null;
-
-    let input = {
-      bankroll: 0,
-      plays: 0,
-      hitOnSoft17: false,
-      numDecks: 0,
-      cutCard: 0,
+    const dom = {
+      bankrollEl: document.querySelector(".bankroll-ipt"),
+      playsEl: document.querySelector(".plays-ipt"),
+      decksEl: document.querySelector(".decks-slt"),
+      cutCardEl: document.querySelector(".cutcard-slt"),
+      form: document.querySelector(".params-form"),
+      initBtn: document.querySelector(".init-btn"),
+      chartBtn: document.querySelector(".chart-btn"),
+      chartCanvas: document.getElementById("profit-chart"),
     };
 
-    let outputs = [];
+    const state = {
+      input: {
+        bankroll: 0,
+        plays: 0,
+        hitOnSoft17: false,
+        numDecks: 1,
+        cutCard: 0.5,
+      },
+      outputs: [],
+      totalPlayedHands: 0,
+      chart: null,
+      game: null,
+    };
 
-    let totalPlayedHands = 0;
-
-    let game;
-
-    document.querySelector(".init-btn").addEventListener("click", () => {
-      init();
-
-      game = createGame(
-        input.numDecks,
-        input.cutCard,
-        input.hitOnSoft17,
-        input.bankroll > 0 ? input.bankroll : undefined
+    dom.initBtn.addEventListener("click", () => {
+      state.input = collectInput();
+      state.game = new Game(
+        state.input.numDecks,
+        state.input.cutCard,
+        state.input.hitOnSoft17,
+        state.input.bankroll
       );
     });
 
-    document.querySelector(".chart-btn").addEventListener("click", () => {
-      if (chart) {
-        chart.destroy(); // előző chart törlése
+    dom.chartBtn.addEventListener("click", () => {
+      if (state.chart) state.chart.destroy();
+
+      const ctx = dom.chartCanvas.getContext("2d");
+      state.chart = createChart(ctx, state.outputs);
+    });
+
+    dom.form?.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const { game, input } = state;
+      const prevBankroll = game.player.bankroll;
+
+      for (let i = 0; i <= input.plays; i++) {
+        game.playRound();
       }
 
-      const ctx = document.getElementById("profit-chart").getContext("2d");
+      const profit = game.player.bankroll - prevBankroll;
+      state.totalPlayedHands += input.plays;
 
-      chart = new Chart(ctx, {
+      state.outputs.push({
+        profitPerPlayedHands: profit,
+        playedHands: state.totalPlayedHands,
+      });
+
+      if (state.chart) {
+        updateChart(state.chart, state.outputs);
+      }
+    });
+
+    function collectInput() {
+      const bankroll = parseInt(dom.bankrollEl.value, 10);
+      const plays = parseInt(dom.playsEl.value, 10);
+      const numDecks = parseInt(dom.decksEl.value, 10);
+      const cutCard = parseFloat(dom.cutCardEl.value);
+      const hitOnSoft17 =
+        document.querySelector('input[name="hit"]:checked')?.value === "true";
+
+      return {
+        bankroll: !isNaN(bankroll) && bankroll > 0 ? bankroll : 300000,
+        plays: !isNaN(plays) && plays > 0 ? plays : 5,
+        numDecks: !isNaN(numDecks) ? numDecks : 1,
+        cutCard: !isNaN(cutCard) ? cutCard : 0.5,
+        hitOnSoft17,
+      };
+    }
+
+    function createChart(ctx, data) {
+      return new Chart(ctx, {
         type: "bar",
         data: {
-          labels: outputs.map(
-            (row, i) => `play #${i + 1}. ${row.playedHands} hands played`
+          labels: data.map(
+            (row, i) => `play #${i + 1} (${row.playedHands} hands)`
           ),
           datasets: [
             {
               label: "#profit per played hands",
-              data: outputs.map((row) => row.profitPerPlayedHands),
+              data: data.map((row) => row.profitPerPlayedHands),
               backgroundColor: "rgba(75, 192, 192, 0.5)",
               borderColor: "rgba(75, 192, 192, 1)",
               borderWidth: 1,
@@ -63,65 +105,18 @@ import { Game } from "./game/Game.js";
         options: {
           responsive: true,
           scales: {
-            y: {
-              beginAtZero: true,
-            },
+            y: { beginAtZero: true },
           },
         },
       });
-    });
-
-    form?.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const previousBankroll = game.player.bankroll;
-
-      for (let i = 0; i <= input.plays; i++) {
-        game.playRound();
-      }
-
-      const actualBankroll = game.player.bankroll;
-
-      totalPlayedHands += input.plays;
-
-      outputs.push({
-        profitPerPlayedHands: actualBankroll - previousBankroll,
-        playedHands: totalPlayedHands,
-      });
-
-      if (chart) {
-        chart.data.labels = outputs.map(
-          (row, i) => `play #${i + 1}. ${row.playedHands} hands played`
-        );
-        chart.data.datasets[0].data = outputs.map(
-          (row) => row.profitPerPlayedHands
-        );
-        chart.update();
-      }
-    });
-
-    function init() {
-      if (!isNaN(+bankrollEl.value) && +bankrollEl.value > 0)
-        input.bankroll = +bankrollEl.value;
-
-      if (!isNaN(+playsEl.value) && +playsEl.value > 0)
-        input.plays = +playsEl.value;
-
-      input.numDecks = +decksEl.value;
-
-      input.cutCard = parseFloat(cutCardEl.value);
-
-      input.hitOnSoft17 =
-        document.querySelector('input[name="hit"]:checked')?.value === "true";
-
-      return input;
     }
 
-    function createGame(numDecks, cutCard, hitOnSoft17, bankroll) {
-      if (numDecks !== 1) {
-        return new Game(numDecks, cutCard, hitOnSoft17, bankroll);
-      } else {
-        return new Game(1, cutCard, hitOnSoft17, bankroll);
-      }
+    function updateChart(chart, data) {
+      chart.data.labels = data.map(
+        (row, i) => `play #${i + 1} (${row.playedHands} hands)`
+      );
+      chart.data.datasets[0].data = data.map((row) => row.profitPerPlayedHands);
+      chart.update();
     }
   });
 })();
