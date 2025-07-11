@@ -1,4 +1,4 @@
-import { KELLY_MULTIPLIER } from "../conf.js";
+import { KELLY_MULTIPLIER } from "/../conf.js";
 
 /**
  * Represents a betting strategy based on the Kelly criterion.

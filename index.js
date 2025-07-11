@@ -1,5 +1,5 @@
 "use strict";
-import { Game } from "./game/Game.js";
+import { Game } from "./src/game/Game.js";
 
 (() => {
   document.addEventListener("DOMContentLoaded", () => {

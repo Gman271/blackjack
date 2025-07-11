@@ -5,7 +5,7 @@ import { Dealer } from "../actors/Dealer.js";
 import { Strategy } from "../strategy/Strategy.js";
 import { BetStrategy } from "../strategy/BetStrategy.js";
 
-import { MOVES } from "../conf.js";
+import { MOVES } from "/../conf.js";
 
 /**
  * Represents a Blackjack game session.

@@ -1,4 +1,4 @@
-import { SUITS, VALUES } from "../conf.js";
+import { SUITS, VALUES } from "/../conf.js";
 
 /**
  * Represents a standard deck of playing cards used in blackjack.
