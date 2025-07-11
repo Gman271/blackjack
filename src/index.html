@@ -18,11 +18,11 @@
       <div class="form-container">
         <form class="params-form">
           <label for="bankroll-ipt">Starting bankroll:</label>
-          <input type="number" class="ipt bankroll-ipt" />
+          <input type="number" id="bankroll-ipt" />
           <label for="plays-ipt">Playable hands:</label>
-          <input type="number" class="ipt plays-ipt" />
+          <input type="number" id="plays-ipt" />
           <label for="decks-slt">Number of decks:</label>
-          <select class="slt decks-slt">
+          <select id="decks-slt">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -31,21 +31,15 @@
             <option value="10">10</option>
           </select>
           <label for="cutcard-slt">Place of the cutcard:</label>
-          <select class="slt cutcard-slt">
+          <select id="cutcard-slt">
             <option value="0.66">~66%</option>
             <option value="0.5">~50%</option>
             <option value="0.33">~33%</option>
           </select>
-          <label for="hit">Dealer stands on soft 17</label>
-          <input
-            type="radio"
-            class="ipt hit-ipt"
-            name="hit"
-            value="false"
-            checked
-          />
-          <label for="hit">Dealer hit on soft 17</label>
-          <input type="radio" class="ipt hit-ipt" name="hit" value="true" />
+          <label for="hit-false">Dealer stands on soft 17</label>
+          <input type="radio" id="hit-false" name="hit" value="false" checked />
+          <label for="hit-true">Dealer hit on soft 17</label>
+          <input type="radio" id="hit-true" name="hit" value="true" />
 
           <input type="submit" class="submit-btn" value="PLAY HANDS" />
         </form>
