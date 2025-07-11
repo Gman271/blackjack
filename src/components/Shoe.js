@@ -11,18 +11,33 @@ export class Shoe {
    * @param {number} endMarkerRatio - Ratio indicating when the cut card is placed (e.g., 0.75 means 75% of the shoe will be played).
    */
   constructor(numDecks = 1, endMarkerRatio) {
+    /** @type {number} */
     this.numDecks = numDecks;
+    /** @type {Array<{suit: string, value: string, countValue: number}>} */
     this.shoe = [];
+    /** @type {boolean} - True if the end marker (cut card) has been reached. */
     this.reachedEndMarker = false;
+    /** Initialize and shuffle the shoe */
     this.initShoe();
+    /**
+     * Index where the cut card is placed.
+     * Once the number of remaining cards drops below this index, the shoe should be reshuffled.
+     */
     this.endMarkerIndex =
       this.shoe.length - Math.floor(this.shoe.length * endMarkerRatio);
   }
 
+  /**
+   * Gets the approximate number of decks remaining in the shoe.
+   * @returns {number}
+   */
   get remainingDecks() {
     return +(this.shoe.length / 52).toFixed(2);
   }
 
+  /**
+   * Initializes the shoe by combining the specified number of decks and shuffling them.
+   */
   initShoe() {
     for (let i = 0; i < this.numDecks; i++) {
       const deck = new Deck();
@@ -32,6 +47,9 @@ export class Shoe {
     this.shuffle();
   }
 
+  /**
+   * Shuffles the shoe using Fisher-Yates algorithm.
+   */
   shuffle() {
     for (let i = this.shoe.length - 1; i > 0; i--) {
       let j = Math.floor(Math.random() * (i + 1));
@@ -39,6 +57,12 @@ export class Shoe {
     }
   }
 
+  /**
+   * Draws one card from the top of the shoe.
+   * If the end marker is reached, sets the `reachedEndMarker` flag.
+   * @returns {{suit: string, value: string, countValue: number}} - The drawn card.
+   * @throws Will throw an error if the shoe is empty.
+   */
   draw() {
     if (this.shoe.length === 0) throw new Error("A shoe üres!");
 
