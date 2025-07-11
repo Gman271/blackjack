@@ -13,8 +13,9 @@ export class Game {
     this.player = new Player(bankroll);
     this.dealer = new Dealer();
     this.betStr = new BetStrategy();
+    this.endMarkerRatio = endMarkerRatio;
     this.hitOnSoft17 = hitOnSoft17;
-    this.initBankroll = bankroll;
+    this.startingBankroll = bankroll;
     this.runningCount = 0;
   }
 
@@ -23,7 +24,7 @@ export class Game {
   }
 
   get bet() {
-    return this.betStr.getBet(this.trueCount, this.initBankroll);
+    return this.betStr.getBet(this.trueCount, this.startingBankroll);
   }
 
   dealInitialCards() {
@@ -38,11 +39,13 @@ export class Game {
   }
 
   playRound() {
-    this.player.placeBet();
+    this.player.placeBet(this.bet);
     this.dealInitialCards();
+
     this.playerTurn();
     this.dealerTurn();
     const result = this.evaluateWinner();
+
     this.resetRound();
 
     return result;
@@ -160,7 +163,6 @@ export class Game {
     this.player.resetHand();
     this.dealer.resetHand();
     if (this.shoe.reachedEndMarker) {
-      console.log("🔄 A shoe elérte a vágókártyát. Újrakeverés...");
       this.shoe = new Shoe(this.shoe.numDecks, this.endMarkerRatio);
       this.runningCount = 0;
     }

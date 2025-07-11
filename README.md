@@ -182,4 +182,4 @@ Contributions are welcome!
 
 ## 📄 License
 
-MIT © 2025 Gergely Kristof Kovacs
+Non-commercial use only. See LICENSE for details.

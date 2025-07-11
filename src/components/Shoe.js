@@ -10,12 +10,13 @@ export class Shoe {
    * @param {number} numDecks - Number of decks to include in the shoe
    * @param {number} endMarkerRatio - Ratio indicating when the cut card is placed (e.g., 0.75 means 75% of the shoe will be played).
    */
-  constructor(numDecks = 1, endMarkerRatio = 0.25) {
+  constructor(numDecks = 1, endMarkerRatio) {
     this.numDecks = numDecks;
     this.shoe = [];
-    this.endMarkerIndex = Math.floor(numDecks * 52 * endMarkerRatio);
     this.reachedEndMarker = false;
     this.initShoe();
+    this.endMarkerIndex =
+      this.shoe.length - Math.floor(this.shoe.length * endMarkerRatio);
   }
 
   get remainingDecks() {

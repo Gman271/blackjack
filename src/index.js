@@ -1,16 +1,12 @@
 "use strict";
 import { Game } from "./game/Game.js";
 
-import Chart from "chart.js/auto";
-
 (() => {
   document.addEventListener("DOMContentLoaded", () => {
     const bankrollEl = document.querySelector(".bankroll-ipt");
     const playsEl = document.querySelector(".plays-ipt");
     const decksEl = document.querySelector(".decks-slt");
     const cutCardEl = document.querySelector(".cutcard-slt");
-
-    const hitOnSoft17El = document.querySelector(".hit-ipt");
 
     const form = document.querySelector(".params-form");
 
@@ -19,9 +15,9 @@ import Chart from "chart.js/auto";
     let input = {
       bankroll: 0,
       plays: 0,
-      hitOnSoft17: hitOnSoft17El.value,
+      hitOnSoft17: false,
       numDecks: 0,
-      cutCard: 0, // 1 = 0.33, 2 = 0.5, 3 = 0.66
+      cutCard: 0,
     };
 
     let outputs = [];
@@ -33,7 +29,12 @@ import Chart from "chart.js/auto";
     document.querySelector(".init-btn").addEventListener("click", () => {
       init();
 
-      game = createGame(input.numDecks, input.cutCard, input.hitOnSoft17);
+      game = createGame(
+        input.numDecks,
+        input.cutCard,
+        input.hitOnSoft17,
+        input.bankroll > 0 ? input.bankroll : undefined
+      );
     });
 
     document.querySelector(".chart-btn").addEventListener("click", () => {
@@ -107,9 +108,10 @@ import Chart from "chart.js/auto";
 
       input.numDecks = +decksEl.value;
 
-      input.cutCard = +cutCardEl.value;
+      input.cutCard = parseFloat(cutCardEl.value);
 
-      if (input.hitOnSoft17 !== "true") input.hitOnSoft17 = false;
+      input.hitOnSoft17 =
+        document.querySelector('input[name="hit"]:checked')?.value === "true";
 
       return input;
     }
